@@ -1,5 +1,7 @@
 # TubeGrab 开发记录（已完成事项，避免重复劳动）
 
+- GitHub 仓库：https://github.com/AmoseCP/TubeGrab（公开，main 分支；本仓库 git config 已设 AmoseCP / amose.d@christianpost.com）。gh CLI 已装并完成 OAuth（含 workflow scope）。
+
 - 2026-07-30 由 Claude Code 按 `TubeGrab开发.md` + `DEV_PLAN.md` 完成 v1 全量开发（Phase 0~4）。
 - 技术决策（详见 DEV_PLAN.md 第 0 节）：
   - 二进制用 `bundle.resources` 捆绑（非 sidecar），因为引擎自更新需要覆盖 yt-dlp 自身；首启复制到 appdata/engine/，之后从副本运行。
