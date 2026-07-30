@@ -1,0 +1,9 @@
+{
+  "bundle": {
+    "targets": ["nsis"],
+    "resources": {
+      "binaries/yt-dlp.exe": "binaries/yt-dlp.exe",
+      "binaries/ffmpeg.exe": "binaries/ffmpeg.exe"
+    }
+  }
+}
