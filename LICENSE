@@ -1,0 +1,49 @@
+TubeGrab License (All Rights Reserved)
+
+Copyright (c) 2026 AmoseCP <amose.d@christianpost.com>
+
+All rights reserved.
+
+1. Grant. Permission is granted to download and use official release builds
+   of this software ("the Software") for personal, non-commercial purposes
+   only.
+
+2. Restrictions. Except as expressly permitted above, no permission is
+   granted to copy, modify, merge, translate, reverse engineer, publish,
+   distribute, sublicense, rent, lease, or sell the Software or its source
+   code, in whole or in part, in any form, without prior written permission
+   from the copyright holder.
+
+3. GitHub. Viewing and forking this repository within the GitHub platform,
+   as permitted by the GitHub Terms of Service, does not grant any of the
+   rights restricted in Section 2.
+
+4. Third-party components. The Software downloads and bundles independent
+   third-party programs at build time, which are licensed under their own
+   terms and are NOT covered by this license:
+   - yt-dlp (https://github.com/yt-dlp/yt-dlp) — Unlicense
+   - FFmpeg (https://ffmpeg.org) — GPL/LGPL; binaries from
+     https://github.com/BtbN/FFmpeg-Builds (Windows) and
+     https://github.com/eugeneware/ffmpeg-static (macOS), source code
+     available at those projects.
+
+5. No warranty. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+   KIND, EXPRESS OR IMPLIED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE
+   LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM THE USE
+   OF THE SOFTWARE. Users are solely responsible for complying with the
+   YouTube Terms of Service and applicable copyright laws.
+
+---
+
+中文摘要（以上英文条款为准）：
+
+版权所有 (c) 2026 AmoseCP。保留所有权利。
+
+- 允许：下载并将官方发布版用于个人非商业用途。
+- 禁止：未经书面许可，复制、修改、反向工程、发布、分发、转授权或
+  出售本软件及其源代码的全部或任何部分。
+- 在 GitHub 平台内查看/fork 本仓库不构成对上述禁止行为的授权。
+- 随构建捆绑的 yt-dlp（Unlicense）与 FFmpeg（GPL/LGPL）为独立第三方
+  程序，适用其各自的许可证，不受本许可证约束。
+- 本软件按"现状"提供，不作任何担保；使用者须自行遵守 YouTube 服务
+  条款及所在地版权法律。
