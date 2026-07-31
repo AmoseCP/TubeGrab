@@ -1,0 +1,23 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- TubeGrab app icon: play-triangle pointing down = "grab the video" -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="512" y1="32" x2="512" y2="560" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="32" y="32" width="960" height="960" rx="218" fill="url(#bg)"/>
+  <rect x="32" y="32" width="960" height="960" rx="218" fill="url(#sheen)"/>
+
+  <!-- arrow shaft -->
+  <rect x="460" y="180" width="104" height="330" rx="52" fill="#FFFFFF"/>
+  <!-- arrowhead = play button rotated to point down -->
+  <path d="M336 482 H688 L512 686 Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="84" stroke-linejoin="round"/>
+  <!-- tray -->
+  <path d="M300 814 H724" stroke="#FFFFFF" stroke-width="84" stroke-linecap="round"/>
+</svg>
