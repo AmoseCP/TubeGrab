@@ -325,7 +325,10 @@ export default function App() {
         {/* 任务列表 */}
         <section>
           <h2 className="mb-2 text-sm font-semibold text-zinc-600">下载任务</h2>
-          <TaskList tasks={tasks} />
+          <TaskList
+            tasks={tasks}
+            onRemoved={(id) => setTasks((prev) => prev.filter((t) => t.id !== id))}
+          />
         </section>
       </main>
 

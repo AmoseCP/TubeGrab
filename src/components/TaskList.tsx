@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { api } from "../api";
 import {
   formatEta,
@@ -25,7 +26,7 @@ const STATUS_COLOR: Record<TaskStatus, string> = {
   canceled: "bg-zinc-100 text-zinc-500",
 };
 
-function TaskRow({ task }: { task: Task }) {
+function TaskRow({ task, onRemove }: { task: Task; onRemove: (task: Task) => void }) {
   const active = task.status === "downloading" || task.status === "merging";
   return (
     <div className="rounded-xl border border-zinc-200 bg-white p-3 shadow-sm">
@@ -85,7 +86,7 @@ function TaskRow({ task }: { task: Task }) {
             <button
               className="rounded-lg px-2 py-1 text-xs text-zinc-400 hover:text-red-600"
               title="移除"
-              onClick={() => api.removeTask(task.id)}
+              onClick={() => onRemove(task)}
             >
               ✕
             </button>
@@ -111,7 +112,15 @@ function TaskRow({ task }: { task: Task }) {
   );
 }
 
-export default function TaskList({ tasks }: { tasks: Task[] }) {
+export default function TaskList({
+  tasks,
+  onRemoved,
+}: {
+  tasks: Task[];
+  onRemoved: (id: number) => void;
+}) {
+  const [pendingRemove, setPendingRemove] = useState<Task | null>(null);
+
   if (tasks.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-zinc-300 p-8 text-center text-sm text-zinc-400">
@@ -119,13 +128,79 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
       </div>
     );
   }
+
+  const failed = tasks.filter((t) => t.status === "failed");
+
+  async function confirmRemove() {
+    if (!pendingRemove) return;
+    const id = pendingRemove.id;
+    setPendingRemove(null);
+    try {
+      await api.removeTask(id);
+      onRemoved(id);
+    } catch {
+      // 任务进行中等原因删除失败，保持列表不变
+    }
+  }
+
+  async function retryAllFailed() {
+    for (const t of failed) {
+      try {
+        await api.retryTask(t.id);
+      } catch {
+        // 任务状态已变化则跳过
+      }
+    }
+  }
+
   // 新任务在前
   const sorted = [...tasks].sort((a, b) => b.id - a.id);
   return (
     <div className="flex flex-col gap-2">
+      {failed.length > 0 && (
+        <div className="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+          <span>{failed.length} 个任务下载失败</span>
+          <button
+            className="rounded-lg bg-red-600 px-3 py-1 font-medium text-white hover:bg-red-700"
+            onClick={retryAllFailed}
+          >
+            全部重试
+          </button>
+        </div>
+      )}
       {sorted.map((t) => (
-        <TaskRow key={t.id} task={t} />
+        <TaskRow key={t.id} task={t} onRemove={setPendingRemove} />
       ))}
+      {pendingRemove && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setPendingRemove(null)}
+        >
+          <div
+            className="w-[400px] max-w-[92vw] rounded-2xl bg-white p-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-base font-semibold text-zinc-800">删除下载任务</h2>
+            <p className="mt-2 break-all text-sm text-zinc-600">
+              确定从列表中删除「{pendingRemove.title}」吗？
+            </p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm hover:bg-zinc-50"
+                onClick={() => setPendingRemove(null)}
+              >
+                取消
+              </button>
+              <button
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                onClick={confirmRemove}
+              >
+                删除
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
