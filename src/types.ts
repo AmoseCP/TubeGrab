@@ -67,6 +67,17 @@ export interface Task {
   filepath: string | null;
 }
 
+export interface AppUpdateInfo {
+  available: boolean;
+  current: string;
+  latest: string;
+  notes: string;
+  pageUrl: string;
+  /** Windows 安装版可应用内自动下载安装；否则引导到下载页 */
+  canAutoInstall: boolean;
+  assetUrl: string | null;
+}
+
 export interface Settings {
   downloadDir: string;
   concurrency: number;

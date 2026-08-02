@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { api, toApiError } from "./api";
 import AboutModal from "./components/AboutModal";
 import FormatPicker from "./components/FormatPicker";
@@ -8,6 +9,7 @@ import SettingsModal from "./components/SettingsModal";
 import TaskList from "./components/TaskList";
 import {
   ApiError,
+  AppUpdateInfo,
   EngineInfo,
   formatDuration,
   PlaylistInfo,
@@ -49,6 +51,11 @@ export default function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const urlRef = useRef<HTMLInputElement>(null);
 
+  const [appUpdate, setAppUpdate] = useState<AppUpdateInfo | null>(null);
+  const [updateBusy, setUpdateBusy] = useState(false);
+  const [updatePct, setUpdatePct] = useState(0);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+
   const refreshEngine = useCallback(() => {
     api
       .getEngineVersion()
@@ -66,6 +73,20 @@ export default function App() {
       setFormat(s.defaultFormat);
     });
     api.getTasks().then(setTasks);
+    // 启动时静默检查应用更新，失败不打扰用户（下次启动会再试）
+    api
+      .checkAppUpdate()
+      .then((u) => {
+        if (u.available) setAppUpdate(u);
+      })
+      .catch(() => {});
+    const unlistenUpdate = listen<{ downloaded: number; total: number }>(
+      "app-update-progress",
+      (event) => {
+        const { downloaded, total } = event.payload;
+        setUpdatePct(total > 0 ? Math.round((downloaded / total) * 100) : 0);
+      },
+    );
     const unlisten = listen<Task>("task-updated", (event) => {
       setTasks((prev) => {
         const t = event.payload;
@@ -78,8 +99,27 @@ export default function App() {
     });
     return () => {
       unlisten.then((fn) => fn());
+      unlistenUpdate.then((fn) => fn());
     };
   }, [refreshEngine]);
+
+  async function doAppUpdate() {
+    if (!appUpdate || updateBusy) return;
+    setUpdateError(null);
+    if (appUpdate.canAutoInstall && appUpdate.assetUrl) {
+      setUpdateBusy(true);
+      setUpdatePct(0);
+      try {
+        // 下载完成后会自动启动安装程序并退出本应用
+        await api.installAppUpdate(appUpdate.assetUrl);
+      } catch (e) {
+        setUpdateBusy(false);
+        setUpdateError(toApiError(e).message);
+      }
+    } else {
+      openUrl(appUpdate.pageUrl).catch(() => {});
+    }
+  }
 
   // 输入变化时自动识别播放列表链接。
   // list=RD*/start_radio 是 YouTube 自动生成的 Mix 电台（无限推荐流），
@@ -191,6 +231,41 @@ export default function App() {
       </header>
 
       <main className="mx-auto flex max-w-3xl flex-col gap-4 px-5 py-5">
+        {appUpdate && (
+          <div className="flex items-center justify-between gap-3 rounded-xl bg-blue-50 p-3 text-sm text-blue-800">
+            <div className="min-w-0">
+              <span>
+                发现新版本 {appUpdate.latest}（当前 v{appUpdate.current}）
+              </span>
+              {updateError && (
+                <div className="mt-1 text-xs text-red-600">{updateError}</div>
+              )}
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                className="rounded-lg bg-blue-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+                disabled={updateBusy}
+                onClick={doAppUpdate}
+              >
+                {updateBusy
+                  ? `下载中 ${updatePct}%`
+                  : appUpdate.canAutoInstall
+                    ? "立即更新"
+                    : "前往下载"}
+              </button>
+              {!updateBusy && (
+                <button
+                  className="text-blue-400 hover:text-blue-600"
+                  title="本次忽略"
+                  onClick={() => setAppUpdate(null)}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {engineError && (
           <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
             下载引擎不可用：{engineError}

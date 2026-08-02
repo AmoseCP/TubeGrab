@@ -3,6 +3,7 @@ mod engine;
 mod error;
 mod parser;
 mod settings;
+mod updater;
 
 use std::sync::{Arc, Mutex};
 
@@ -34,6 +35,8 @@ pub fn run() {
             download::open_in_folder,
             settings::get_settings,
             settings::save_settings,
+            updater::check_app_update,
+            updater::install_app_update,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

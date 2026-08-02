@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import type {
   ApiError,
+  AppUpdateInfo,
   EngineInfo,
   PlaylistInfo,
   Settings,
@@ -30,4 +31,6 @@ export const api = {
   openInFolder: (path: string) => invoke<void>("open_in_folder", { path }),
   getSettings: () => invoke<Settings>("get_settings"),
   saveSettings: (settings: Settings) => invoke<void>("save_settings", { settings }),
+  checkAppUpdate: () => invoke<AppUpdateInfo>("check_app_update"),
+  installAppUpdate: (url: string) => invoke<void>("install_app_update", { url }),
 };
