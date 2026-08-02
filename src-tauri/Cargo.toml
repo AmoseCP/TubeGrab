@@ -1,6 +1,6 @@
 [package]
 name = "tubegrab"
-version = "0.1.0"
+version = "0.2.0"
 description = "TubeGrab - YouTube video/audio downloader"
 authors = ["amose"]
 edition = "2021"
