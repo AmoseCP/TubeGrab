@@ -23,8 +23,13 @@ jobs:
             name: windows-x64
           - os: macos-latest # Apple Silicon
             name: macos-arm64
-          - os: macos-13 # Intel
+            mac_arch: arm64
+            rust_target: aarch64-apple-darwin
+          # GitHub 已淘汰 Intel runner（macos-13），x64 版在 arm64 上交叉编译
+          - os: macos-latest
             name: macos-x64
+            mac_arch: x64
+            rust_target: x86_64-apple-darwin
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -34,6 +39,8 @@ jobs:
           node-version: 22
 
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_target || '' }}
 
       - name: Fetch engine binaries (Windows)
         if: runner.os == 'Windows'
@@ -41,13 +48,18 @@ jobs:
 
       - name: Fetch engine binaries (macOS)
         if: runner.os == 'macOS'
-        run: bash scripts/fetch-binaries.sh
+        run: bash scripts/fetch-binaries.sh ${{ matrix.mac_arch }}
 
       - name: Install frontend dependencies
         run: npm ci
 
-      - name: Build app
+      - name: Build app (Windows)
+        if: runner.os == 'Windows'
         run: npm run tauri build
+
+      - name: Build app (macOS)
+        if: runner.os == 'macOS'
+        run: npm run tauri build -- --target ${{ matrix.rust_target }}
 
       - name: Make portable package (Windows)
         if: runner.os == 'Windows'
@@ -67,7 +79,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: TubeGrab-${{ matrix.name }}
-          path: src-tauri/target/release/bundle/dmg/*.dmg
+          path: src-tauri/target/${{ matrix.rust_target }}/release/bundle/dmg/*.dmg
 
       # 发布流程是先推 tag、再手动 gh release create，
       # 因此这里等 release 出现后再把 dmg 传上去。
@@ -82,4 +94,4 @@ jobs:
             echo "release $TAG 尚不存在，等待 60s（$i/20）"
             sleep 60
           done
-          gh release upload "$TAG" src-tauri/target/release/bundle/dmg/*.dmg --clobber
+          gh release upload "$TAG" src-tauri/target/${{ matrix.rust_target }}/release/bundle/dmg/*.dmg --clobber
