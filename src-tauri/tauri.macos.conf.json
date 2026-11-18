@@ -1,9 +1,17 @@
 {
   "bundle": {
-    "targets": ["dmg"],
+    "targets": ["app", "dmg"],
+    "macOS": {
+      "minimumSystemVersion": "12.0",
+      "signingIdentity": "-",
+      "hardenedRuntime": false
+    },
     "resources": {
       "binaries/yt-dlp": "binaries/yt-dlp",
-      "binaries/ffmpeg": "binaries/ffmpeg"
+      "binaries/ffmpeg": "binaries/ffmpeg",
+      "binaries/ffprobe": "binaries/ffprobe",
+      "binaries/deno": "binaries/deno",
+      "binaries/licenses/": "licenses/"
     }
   }
 }

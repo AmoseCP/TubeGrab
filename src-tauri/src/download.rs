@@ -12,7 +12,7 @@ use tauri::{Emitter, Manager};
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::sync::oneshot;
 
-use crate::engine::{ensure_engine, ffmpeg_path, new_command};
+use crate::engine::ytdlp_command;
 use crate::error::{classify_ytdlp_error, ApiError};
 use crate::parser::validate_url;
 use crate::settings::load_settings;
@@ -187,14 +187,12 @@ async fn run_download(app: tauri::AppHandle, id: u64, mut kill_rx: oneshot::Rece
     };
 
     let result: Result<Option<String>, ApiError> = async {
-        let ytdlp = ensure_engine(&app)?;
-        let ffmpeg = ffmpeg_path(&app)?;
         let out_dir = PathBuf::from(&settings.download_dir);
         std::fs::create_dir_all(&out_dir)
             .map_err(|e| ApiError::internal(format!("无法创建下载目录: {e}")))?;
         let outtmpl = out_dir.join(&settings.filename_template);
 
-        let mut cmd = new_command(&ytdlp);
+        let mut cmd = ytdlp_command(&app)?;
         cmd.args(format_args(&format))
             .args([
                 "--no-playlist",
@@ -207,14 +205,11 @@ async fn run_download(app: tauri::AppHandle, id: u64, mut kill_rx: oneshot::Rece
                 "--no-simulate",
                 "--print",
                 "after_move:FILEPATH::%(filepath)s",
-                "--ffmpeg-location",
             ])
-            .arg(&ffmpeg)
             .arg("-o")
             .arg(&outtmpl)
             .arg("--")
             .arg(&url)
-            .env("PYTHONIOENCODING", "utf-8")
             .stdin(std::process::Stdio::null())
             .stdout(std::process::Stdio::piped())
             .stderr(std::process::Stdio::piped());

@@ -1,6 +1,6 @@
 //! 链接解析：一切通过 yt-dlp -J，绝不自己实现解析逻辑。
 
-use crate::engine::{ensure_engine, new_command};
+use crate::engine::ytdlp_command;
 use crate::error::{classify_ytdlp_error, ApiError};
 
 /// URL 校验：仅接受 http/https 且不含空白/控制字符。
@@ -20,8 +20,7 @@ pub fn validate_url(url: &str) -> Result<String, ApiError> {
 }
 
 async fn run_json(app: &tauri::AppHandle, args: &[&str]) -> Result<serde_json::Value, ApiError> {
-    let ytdlp = ensure_engine(app)?;
-    let output = new_command(&ytdlp)
+    let output = ytdlp_command(app)?
         .args(args)
         .output()
         .await

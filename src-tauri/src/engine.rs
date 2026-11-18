@@ -46,6 +46,23 @@ pub fn ffmpeg_path(app: &tauri::AppHandle) -> Result<PathBuf, ApiError> {
         .map_err(|e| ApiError::internal(format!("无法定位捆绑的 ffmpeg: {e}")))
 }
 
+/// Finder 启动的 macOS 应用没有终端 PATH，显式指定捆绑的 JavaScript 运行时。
+pub fn ytdlp_command(app: &tauri::AppHandle) -> Result<Command, ApiError> {
+    let mut cmd = new_command(&ensure_engine(app)?);
+    cmd.arg("--ignore-config")
+        .arg("--ffmpeg-location")
+        .arg(ffmpeg_path(app)?)
+        .env("PYTHONIOENCODING", "utf-8");
+    #[cfg(target_os = "macos")]
+    {
+        let deno = app.path()
+            .resolve("binaries/deno", BaseDirectory::Resource)
+            .map_err(|e| ApiError::internal(format!("无法定位捆绑的 Deno: {e}")))?;
+        cmd.arg("--js-runtimes").arg(format!("deno:{}", deno.display()));
+    }
+    Ok(cmd)
+}
+
 /// 确保应用数据目录中存在 yt-dlp 副本（首次启动时从资源复制）。
 pub fn ensure_engine(app: &tauri::AppHandle) -> Result<PathBuf, ApiError> {
     let target = ytdlp_path(app)?;

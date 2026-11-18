@@ -5,6 +5,7 @@
 - 架构：Tauri 2（Rust 后端） + React + TypeScript + Tailwind（前端）
 - 下载引擎：捆绑 [yt-dlp](https://github.com/yt-dlp/yt-dlp) 独立二进制（不自己实现任何解析逻辑）
 - 后处理：捆绑 [ffmpeg](https://ffmpeg.org/) 静态构建（DASH 音视频流合并、MP3 转码）
+- macOS 同时捆绑 ffprobe 与 Deno（YouTube JavaScript challenge solver），无需另外安装 Python、Homebrew 或下载工具。
 
 ## 开发环境要求
 
@@ -61,12 +62,18 @@ src-tauri\binaries\yt-dlp.exe -f "bv*[height<=1080][vcodec^=avc1]+ba[ext=m4a]/b[
 ```bash
 npm run tauri build     # 安装包
 npm run build:win       # Windows：安装包 + 便携版 zip 一次生成
+npm run build:mac       # macOS：下载全部引擎依赖，并构建本机架构的 App + DMG
 ```
 
 - Windows 产物：
   - `src-tauri/target/release/bundle/nsis/*.exe`（NSIS 安装包）
   - `src-tauri/target/release/bundle/portable/*.zip`（便携版免安装，解压即用；由 `scripts/make-portable.ps1` 生成，可单独在 tauri build 之后运行）
 - macOS 产物：`src-tauri/target/release/bundle/dmg/*.dmg`
+- macOS 应用：`src-tauri/target/release/bundle/macos/TubeGrab.app`
+
+macOS 安装（macOS 12 或更新版本）：打开 DMG，将 TubeGrab 拖入 Applications 后启动。粘贴视频链接，点击「解析」，选择清晰度后点击「下载」。默认保存到 `~/Downloads/TubeGrab`，可在「设置」中修改。
+
+`build:mac` 使用 `hdiutil` 直接生成并验证 DMG，不依赖 Finder 自动化。已有 `.app` 时，可单独运行 `bash scripts/make-macos-dmg.sh`。
 
 > 便携版依赖系统的 WebView2 运行时（Win10/11 一般自带）；设置与下载队列仍保存在 `%APPDATA%\com.amose.tubegrab\`。
 

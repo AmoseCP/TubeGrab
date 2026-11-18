@@ -59,7 +59,9 @@ jobs:
 
       - name: Build app (macOS)
         if: runner.os == 'macOS'
-        run: npm run tauri build -- --target ${{ matrix.rust_target }}
+        run: |
+          npm run tauri build -- --target ${{ matrix.rust_target }} --bundles app
+          bash scripts/make-macos-dmg.sh ${{ matrix.rust_target }}
 
       - name: Make portable package (Windows)
         if: runner.os == 'Windows'
